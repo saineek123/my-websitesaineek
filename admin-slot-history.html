@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Slot History</title>
+  <style>
+    body {
+      background: #101010;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    h2 {
+      text-align: center;
+      color: gold;
+    }
+    table {
+      width: 100%;
+      margin-top: 20px;
+      border-collapse: collapse;
+    }
+    th, td {
+      border: 1px solid #333;
+      padding: 10px;
+      text-align: center;
+    }
+    th {
+      background-color: #222;
+    }
+    tr:nth-child(even) {
+      background-color: #1a1a1a;
+    }
+    .no-data {
+      color: gray;
+      text-align: center;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>🛠️ Admin Panel: Slot Game History</h2>
+  <div id="historyContainer"></div>
+
+  <script>
+    const history = JSON.parse(localStorage.getItem("slotHistory")) || [];
+
+    const container = document.getElementById("historyContainer");
+
+    if (history.length === 0) {
+      container.innerHTML = `<p class="no-data">No slot history available.</p>`;
+    } else {
+      let table = `<table>
+        <tr>
+          <th>Game</th>
+          <th>Symbols</th>
+          <th>Amount</th>
+          <th>Status</th>
+          <th>Time</th>
+        </tr>`;
+
+      history.reverse().forEach(h => {
+        table += `<tr>
+          <td>${h.game}</td>
+          <td>${h.result}</td>
+          <td>₹${h.amount}</td>
+          <td>${h.status}</td>
+          <td>${h.time}</td>
+        </tr>`;
+      });
+
+      table += `</table>`;
+      container.innerHTML = table;
+    }
+  </script>
+<script src="script.js"></script>
+
+</body>
+</html>

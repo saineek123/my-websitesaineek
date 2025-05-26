@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Lucky Spin</title>
+ 
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #0f0f0f;
+      color: #fff;
+      margin: 0; padding: 20px; text-align: center;
+    }
+    .container {
+      max-width: 400px; margin: 50px auto; background: #1c1c1c;
+      border-radius: 12px; padding: 30px;
+      box-shadow: 0 0 10px rgba(0,255,255,0.2);
+    }
+    h2 {
+      color: #00e5ff; margin-bottom: 25px;
+    }
+    #spinner {
+      margin: 30px auto;
+      width: 200px; height: 200px;
+      border-radius: 50%;
+      border: 10px solid #00e5ff;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 0 20px #00e5ff;
+    }
+    #spinner div {
+      position: absolute;
+      width: 50%; height: 50%;
+      top: 50%; left: 50%;
+      transform-origin: 0% 0%;
+      text-align: center;
+      line-height: 80px;
+      font-weight: bold;
+      font-size: 18px;
+      color: #000;
+      background: #00e5ff;
+      border: 1px solid #fff;
+      box-sizing: border-box;
+      border-radius: 0 100% 0 0;
+      user-select: none;
+    }
+    #spinButton {
+      margin-top: 20px;
+      padding: 12px;
+      width: 100%;
+      font-weight: bold;
+      font-size: 16px;
+      color: #000;
+      background-color: #00e5ff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    #spinButton:hover {
+      background-color: #00bcd4;
+    }
+    .result {
+      margin-top: 20px;
+      font-weight: bold;
+      font-size: 18px;
+    }
+    .back-link {
+      margin-top: 30px;
+    }
+    .back-link a {
+      color: #00e5ff;
+      text-decoration: none;
+    }
+    .back-link a:hover {
+      text-decoration: underline;
+    }
+    input[type="number"] {
+      border-radius: 6px;
+      padding: 6px;
+      border: none;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <nav style="background: #222; padding: 10px; text-align: center;">
+    <a href="index.html" style="color:white; margin:10px;">Home</a>
+    <a href="recharge.html" style="color:white; margin:10px;">Recharge</a>
+    <a href="withdraw.html" style="color:white; margin:10px;">Withdraw</a>
+    <a href="history.html" style="color:white; margin:10px;">History</a>
+    <a href="account.html" style="color:white; margin:10px;">Account</a>
+    <a href="support.html" style="color:white; margin:10px;">Support</a>
+    <a href="login.html" style="color:white; margin:10px;">Logout</a>
+  </nav>
+
+  <div class="container">
+    <h2>Lucky Spin</h2>
+    <p><strong>Balance:</strong> ₹<span id="balance">0</span></p>
+    <p>
+      <strong>Bet Amount:</strong> ₹
+      <input type="number" id="betAmount" value="10" min="1" />
+    </p>
+    <div id="spinner"></div>
+    <button id="spinButton">Spin Now</button>
+    <div class="result" id="resultMessage"></div>
+    <div class="back-link">
+      <a href="index.html">← Back to Dashboard</a>
+    </div>
+  </div>
+
+  <script>
+    const rewards = [0, 1, 2, 5, 10, 20, 50, 0]; // Multiplier values
+    const spinner = document.getElementById('spinner');
+    const balanceEl = document.getElementById('balance');
+    const resultMessage = document.getElementById('resultMessage');
+    const spinButton = document.getElementById('spinButton');
+    const betAmountInput = document.getElementById('betAmount');
+
+    let user = JSON.parse(localStorage.getItem('loggedInUser'));
+    if (!user) {
+      user = { name: 'Guest', balance: 100 };
+      localStorage.setItem('loggedInUser', JSON.stringify(user));
+    }
+
+    balanceEl.innerText = user.balance;
+
+    function createSlices() {
+      spinner.innerHTML = '';
+      for (let i = 0; i < 8; i++) {
+        const slice = document.createElement('div');
+        slice.innerText = rewards[i] + "x";
+        slice.style.transform = `rotate(${i * 45}deg) skewY(-45deg)`;
+        spinner.appendChild(slice);
+      }
+    }
+    createSlices();
+
+    spinButton.addEventListener('click', () => {
+      let betAmount = parseInt(betAmountInput.value);
+      if (isNaN(betAmount) || betAmount <= 0) {
+        alert("Please enter a valid bet amount.");
+        return;
+      }
+
+      if (user.balance < betAmount) {
+        alert("Insufficient balance to spin!");
+        return;
+      }
+
+      spinButton.disabled = true;
+      resultMessage.innerText = "";
+      user.balance -= betAmount;
+      updateBalance();
+
+      const spins = Math.floor(Math.random() * 360) + 3600;
+      spinner.style.transition = 'transform 4s ease-out';
+      spinner.style.transform = `rotate(${spins}deg)`;
+
+      setTimeout(() => {
+        let normalized = spins % 360;
+        let index = Math.floor((360 - normalized) / 45) % 8;
+        let multiplier = rewards[index];
+        let reward = betAmount * multiplier;
+        let winAmount = Math.floor(reward * 0.10); // Only 10% winning
+
+        if (multiplier > 0) {
+          user.balance += winAmount;
+          resultMessage.style.color = '#00ff99';
+          resultMessage.innerText = `🎉 You won ₹${winAmount} (10% of ₹${reward}) (×${multiplier})!`;
+        } else {
+          resultMessage.style.color = '#ff5555';
+          resultMessage.innerText = `😞 No reward, try again!`;
+        }
+
+        updateBalance();
+        localStorage.setItem('loggedInUser', JSON.stringify(user));
+        spinButton.disabled = false;
+        spinner.style.transition = 'none';
+        spinner.style.transform = `rotate(${normalized}deg)`;
+      }, 4000);
+    });
+
+    function updateBalance() {
+      balanceEl.innerText = user.balance;
+    }
+  </script>
+</body>
+</html>

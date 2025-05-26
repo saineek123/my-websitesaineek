@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Withdraw Wallet</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #0f0f0f;
+      color: #fff;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 400px;
+      margin: 50px auto;
+      background-color: #1c1c1c;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0, 255, 255, 0.1);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 25px;
+      color: #00e5ff;
+    }
+
+    label {
+      font-size: 14px;
+      margin-top: 10px;
+      display: block;
+    }
+
+    input[type="number"],
+    input[type="text"],
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 8px;
+      margin-bottom: 16px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    input[type="number"],
+    input[type="text"] {
+      background-color: #2a2a2a;
+      color: #fff;
+    }
+
+    button {
+      background-color: #00e5ff;
+      color: #000;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background-color: #00bcd4;
+    }
+
+    .back-link {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .back-link a {
+      color: #00e5ff;
+      text-decoration: none;
+    }
+
+    .back-link a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <nav style="background: #222; padding: 10px; text-align: center;">
+  <a href="index.html" style="color:white; margin:10px;">Home</a>
+  <a href="recharge.html" style="color:white; margin:10px;">Recharge</a>
+  <a href="withdraw.html" style="color:white; margin:10px;">Withdraw</a>
+  <a href="history.html" style="color:white; margin:10px;">History</a>
+  <a href="account.html" style="color:white; margin:10px;">Account</a>
+  <a href="support.html" style="color:white; margin:10px;">Support</a>
+  <a href="login.html" style="color:white; margin:10px;">Logout</a>
+</nav>
+
+  <div class="container">
+    <h2>Withdraw Request</h2>
+
+    <form id="withdrawForm">
+      <label>Enter Amount</label>
+      <input type="number" id="amount" required />
+
+      <label>Your UPI ID</label>
+      <input type="text" id="upi" placeholder="example@upi" required />
+      
+
+
+      <button type="submit">Submit Withdraw</button>
+    </form>
+
+    <div class="back-link">
+      <a href="index.html">← Back to Dashboard</a>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById("withdrawForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const amount = document.getElementById("amount").value;
+      const upi = document.getElementById("upi").value;
+
+      if (!amount || !upi) {
+        alert("Please fill all fields.");
+        return;
+      }
+
+      alert("Withdraw request submitted!\nAmount: ₹" + amount + "\nUPI: " + upi);
+
+      // Optionally, save to localStorage or send to backend here
+      document.getElementById("withdrawForm").reset();
+    });
+    const rechargeData = {
+  amount: document.getElementById("amount").value,
+  date: new Date().toLocaleString(),
+  status: "Pending"
+};
+let recharges = JSON.parse(localStorage.getItem("recharges")) || [];
+recharges.push(rechargeData);
+localStorage.setItem("recharges", JSON.stringify(recharges));
+
+  </script>
+  <script src="script.js"></script>
+
+</body>
+</html>

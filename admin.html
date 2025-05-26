@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Panel</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #111;
+      color: #fff;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background: #222;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h2 {
+      margin: 0;
+      color: #00e5ff;
+    }
+
+    header button {
+      background: #ff4444;
+      border: none;
+      color: white;
+      padding: 10px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    main {
+      padding: 20px;
+    }
+
+    section {
+      margin-bottom: 40px;
+    }
+
+    h3 {
+      margin-bottom: 10px;
+      color: #00e5ff;
+    }
+
+    .card {
+      background: #1c1c1c;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      box-shadow: 0 0 10px rgba(0,255,255,0.05);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #1c1c1c;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid #333;
+      text-align: center;
+    }
+
+    th {
+      background: #222;
+      color: #00e5ff;
+    }
+
+    button.action-btn {
+      padding: 6px 10px;
+      margin: 2px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .approve {
+      background: #00c853;
+      color: white;
+    }
+
+    .reject {
+      background: #d50000;
+      color: white;
+    }
+
+    .slot-link {
+      background: #00e5ff;
+      color: black;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    img {
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h2>Admin Dashboard</h2>
+    <button onclick="logout()">Logout</button>
+  </header>
+
+  <main>
+    <!-- Overview -->
+    <section>
+      <h3>Overview</h3>
+      <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+        <div class="card">Total Users: <span id="totalUsers">0</span></div>
+        <div class="card">Total Recharge: ₹<span id="totalRecharge">0</span></div>
+        <div class="card">Total Withdraw: ₹<span id="totalWithdraw">0</span></div>
+      </div>
+    </section>
+
+    <!-- Recharge Requests -->
+    <section>
+      <h3>Recharge Requests</h3>
+      <table id="rechargeTable">
+        <tr>
+          <th>Amount</th>
+          <th>UPI</th>
+          <th>Status</th>
+          <th>Screenshot</th>
+          <th>Action</th>
+        </tr>
+      </table>
+    </section>
+
+    <!-- Withdraw Requests -->
+    <section>
+      <h3>Withdraw Requests</h3>
+      <table id="withdrawTable">
+        <tr>
+          <th>Amount</th>
+          <th>UPI</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </table>
+    </section>
+
+    <!-- Users List -->
+    <section>
+      <h3>All Users</h3>
+      <table id="usersTable">
+        <tr>
+          <th>Username</th>
+          <th>Email</th>
+          <th>Balance</th>
+        </tr>
+      </table>
+    </section>
+
+    <!-- Slot History -->
+    <div class="card">
+      <h3>📜 Slot Game History (Admin)</h3>
+      <button class="slot-link" onclick="window.location.href='admin-slot-history.html'">View All</button>
+    </div>
+  </main>
+
+  <!-- ✅ Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js"></script>
+  <script>
+    // 🛠️ Replace with your real Firebase config
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "SENDER_ID",
+      appId: "APP_ID"
+    };
+
+    
+const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+  
+  </script>
+
+  <script>
+    // Realtime admin dashboard logic
+    db.ref("recharges").on("value", (snapshot) => {
+      const rechargeTable = document.getElementById("rechargeTable");
+      const data = snapshot.val();
+      let totalRecharge = 0;
+
+      // Remove existing rows
+      rechargeTable.innerHTML = `
+        <tr>
+          <th>Amount</th>
+          <th>UPI</th>
+          <th>Status</th>
+          <th>Screenshot</th>
+          <th>Action</th>
+        </tr>`;
+
+      for (const id in data) {
+        const r = data[id];
+        totalRecharge += parseFloat(r.amount);
+        const row = rechargeTable.insertRow();
+
+        const imgTag = r.screenshot
+          ? `<a href="${r.screenshot}" target="_blank"><img src="${r.screenshot}" width="50" /></a>`
+          : 'No Image';
+
+        row.innerHTML = `
+          <td>₹${r.amount}</td>
+          <td>${r.upi}</td>
+          <td>${r.status}</td>
+          <td>${imgTag}</td>
+          <td>
+            ${r.status === "pending" ? `
+              <button class="action-btn approve" onclick="approveRecharge('${id}', ${r.amount}, '${r.userId}')">Approve</button>
+              <button class="action-btn reject" onclick="rejectRecharge('${id}')">Reject</button>` : "—"}
+          </td>`;
+      }
+
+      document.getElementById("totalRecharge").innerText = totalRecharge;
+    });
+
+    function approveRecharge(id, amount, userId) {
+      db.ref("recharges/" + id).update({ status: "approved" });
+      const userWalletRef = db.ref("users/" + userId + "/walletBalance");
+      userWalletRef.once("value").then((snap) => {
+        const currentBalance = snap.val() || 0;
+        userWalletRef.set(currentBalance + amount);
+      });
+    }
+
+    function rejectRecharge(id) {
+      db.ref("recharges/" + id).update({ status: "rejected" });
+    }
+
+    function logout() {
+      alert("Logged out!");
+      window.location.href = "login.html";
+    }
+  
+  </script>
+</body>
+</html>

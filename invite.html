@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Invite & Earn</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #121212;
+      color: #fff;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .container {
+      max-width: 400px;
+      margin-top: 60px;
+      background: #1e1e1e;
+      border-radius: 12px;
+      padding: 25px;
+      text-align: center;
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.05);
+    }
+
+    h2 {
+      margin-bottom: 10px;
+      color: #00ffcc;
+    }
+
+    p {
+      font-size: 15px;
+      color: #aaa;
+    }
+
+    .referral-code {
+      font-size: 22px;
+      font-weight: bold;
+      background: #2a2a2a;
+      padding: 12px;
+      margin: 20px 0;
+      border-radius: 6px;
+      letter-spacing: 1px;
+    }
+
+    .copy-btn {
+      background-color: #00cc99;
+      border: none;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-top: 10px;
+    }
+
+    .copy-btn:hover {
+      background-color: #00b38f;
+    }
+
+    .invite-link {
+      word-break: break-word;
+      margin-top: 15px;
+      color: #ccc;
+      font-size: 14px;
+    }
+
+    .note {
+      margin-top: 30px;
+      font-size: 13px;
+      color: #777;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Invite & Earn</h2>
+    <p>Invite friends using your code and earn wallet rewards!</p>
+
+    <div class="referral-code" id="referralCode">Loading...</div>
+    <button class="copy-btn" onclick="copyReferral()">Copy Code</button>
+
+    <div class="invite-link" id="inviteLink">Generating link...</div>
+    <button class="copy-btn" onclick="copyLink()">Copy Link</button>
+
+    <div class="note">Share with your friends and earn rewards after successful registration.</div>
+  </div>
+
+  <script>
+    // Load user from localStorage
+    let user = JSON.parse(localStorage.getItem("user")) || {
+      phone: "9876543210",
+      referralCode: "ABC123"
+    };
+
+    // Set referral code and link
+    const referralCode = user.referralCode || "UNKNOWN";
+    const referralLink = `https://yourdomain.com/register.html?ref=${referralCode}`;
+
+    document.getElementById("referralCode").innerText = referralCode;
+    document.getElementById("inviteLink").innerText = referralLink;
+
+    function copyReferral() {
+      navigator.clipboard.writeText(referralCode);
+      alert("Referral Code Copied: " + referralCode);
+    }
+
+    function copyLink() {
+      navigator.clipboard.writeText(referralLink);
+      alert("Referral Link Copied!");
+    }
+  </script>
+</body>
+</html>

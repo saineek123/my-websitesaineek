@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Withdraw History</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #121212;
+      color: #fff;
+      margin: 0;
+      padding: 0;
+    }
+
+    nav {
+      background-color: #1e1e1e;
+      padding: 10px 0;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+    }
+
+    nav a {
+      color: #00e5ff;
+      margin: 0 15px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    nav a:hover {
+      text-decoration: underline;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 40px auto;
+      background-color: #1c1c1c;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0, 255, 255, 0.05);
+    }
+
+    h2 {
+      text-align: center;
+      color: #00e5ff;
+      margin-bottom: 25px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #2a2a2a;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: center;
+      border-bottom: 1px solid #444;
+    }
+
+    th {
+      background: #00e5ff;
+      color: #000;
+    }
+
+    .status-pending {
+      color: orange;
+    }
+
+    .status-approved {
+      color: #00c853;
+    }
+
+    .status-rejected {
+      color: red;
+    }
+
+    .no-data {
+      text-align: center;
+      margin-top: 20px;
+      color: #ccc;
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="recharge.html">Recharge</a>
+    <a href="withdraw.html">Withdraw</a>
+    <a href="withdraw-history.html">Withdraw History</a>
+    <a href="account.html">Account</a>
+  </nav>
+
+  <div class="container">
+    <h2>Withdraw History</h2>
+
+    <table id="withdrawTable">
+      <tr>
+        <th>Amount</th>
+        <th>UPI</th>
+        <th>Status</th>
+      </tr>
+      <!-- Data will be inserted by JS -->
+    </table>
+
+    <div id="noData" class="no-data" style="display: none;">No withdraw history found.</div>
+  </div>
+
+  <script>
+    const withdrawTable = document.getElementById("withdrawTable");
+    const noData = document.getElementById("noData");
+
+    const withdraws = JSON.parse(localStorage.getItem("withdraws")) || [];
+
+    if (withdraws.length === 0) {
+      noData.style.display = "block";
+      withdrawTable.style.display = "none";
+    } else {
+      withdraws.forEach((w) => {
+        const row = withdrawTable.insertRow();
+        row.innerHTML = `
+          <td>₹${w.amount}</td>
+          <td>${w.upi}</td>
+          <td class="status-${w.status.toLowerCase()}">${w.status}</td>
+        `;
+      });
+    }
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Recharge Wallet</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #121212;
+      color: #fff;
+      margin: 0;
+      padding: 0;
+    }
+
+    nav {
+      background-color: #1e1e1e;
+      padding: 12px 0;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+    }
+
+    nav a {
+      color: #00e5ff;
+      margin: 0 15px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    nav a:hover {
+      text-decoration: underline;
+    }
+
+    .container {
+      max-width: 400px;
+      margin: 30px auto;
+      background-color: #1c1c1c;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0, 229, 255, 0.05);
+    }
+
+    h2 {
+      text-align: center;
+      color: #00e5ff;
+      margin-bottom: 25px;
+    }
+
+    label {
+      font-size: 14px;
+      display: block;
+      margin-top: 15px;
+    }
+
+    input[type="number"],
+    input[type="text"],
+    input[type="file"],
+    select {
+      width: 100%;
+      padding: 12px;
+      margin-top: 5px;
+      background-color: #2a2a2a;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 20px;
+      background-color: #00e5ff;
+      color: #000;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .qr-section {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .upi-id-copy {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #2a2a2a;
+      padding: 10px;
+      border-radius: 8px;
+      margin-top: 10px;
+    }
+
+    .upi-id-copy span {
+      color: #00e5ff;
+      font-size: 14px;
+    }
+
+    .copy-btn {
+      background: #00e5ff;
+      color: #000;
+      padding: 6px 10px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .success-msg {
+      color: lightgreen;
+      margin-top: 15px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="recharge.html">Recharge</a>
+    <a href="withdraw.html">Withdraw</a>
+    <a href="history.html">History</a>
+    <a href="account.html">Account</a>
+  </nav>
+
+  <div class="container">
+    <h2>Recharge Wallet</h2>
+
+    <div class="qr-section">
+      <img src="png.jpg" alt="QR Code" width="200" />
+      <div class="upi-id-copy">
+        <span id="fixedUpi">9792368894@ptyes</span>
+        <button class="copy-btn" onclick="copyUpi()">Copy</button>
+      </div>
+    </div>
+
+    <form id="rechargeForm">
+      <label>Enter Amount (₹)</label>
+      <input type="number" id="amount" required />
+
+      <label>Select Payment Method</label>
+      <select id="paymentMethod" required>
+        <option value="">-- Select --</option>
+        <option value="upi">UPI</option>
+        <option value="paytm">Paytm</option>
+        <option value="gpay">Google Pay</option>
+        <option value="phonepe">PhonePe</option>
+        <option value="netbanking">Net Banking</option>
+        <option value="card">Credit/Debit Card</option>
+      </select>
+
+      <label>Your UPI ID</label>
+      <input type="text" id="upi" value="9792368894@ptyes" readonly />
+
+      <label>Upload Screenshot</label>
+      <input type="file" id="screenshot" accept="image/*" required />
+
+      <button type="submit">Submit Recharge</button>
+    </form>
+
+    <p class="success-msg" id="successMsg"></p>
+  </div>
+
+  <!-- ✅ Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js"></script>
+  <script>
+    // 🔁 Replace below with your own Firebase config
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "SENDER_ID",
+      appId: "APP_ID"
+    };
+
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+  </script>
+
+  <script>
+    function copyUpi() {
+      const upiText = document.getElementById("fixedUpi").innerText;
+      navigator.clipboard.writeText(upiText).then(() => {
+        alert("UPI ID copied: " + upiText);
+      });
+    }
+
+    document.getElementById("rechargeForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const amount = parseFloat(document.getElementById("amount").value);
+      const screenshot = document.getElementById("screenshot").files[0];
+      const paymentMethod = document.getElementById("paymentMethod").value;
+      const successMsg = document.getElementById("successMsg");
+
+      if (!amount || !screenshot || !paymentMethod) {
+        alert("Please fill all fields.");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function () {
+        const screenshotBase64 = reader.result;
+
+        const rechargeRequest = {
+          amount: amount,
+          upi: "9792368894@ptyes",
+          paymentMethod: paymentMethod,
+          screenshot: screenshotBase64,
+          date: new Date().toLocaleString(),
+          status: "pending",
+          userId: "user123" // यहां आप real userId डाल सकते हैं
+        };
+
+        firebase.database().ref('recharges').push(rechargeRequest)
+          .then(() => {
+            successMsg.innerText = "Recharge request sent! Waiting for admin approval.";
+            document.getElementById("rechargeForm").reset();
+          })
+          .catch((error) => {
+            alert("Error: " + error.message);
+          });
+      };
+
+      reader.readAsDataURL(screenshot);
+    });
+  </script>
+
+</body>
+</html>

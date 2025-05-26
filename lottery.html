@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mines Game</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; background: #1c1c1c; color: white; }
+    .grid { display: grid; grid-template-columns: repeat(5, 60px); gap: 10px; justify-content: center; margin-top: 20px; }
+    .tile { width: 60px; height: 60px; background: #444; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 20px; border-radius: 5px; }
+    .safe { background: #2ecc71; }
+    .mine { background: #e74c3c; }
+  </style>
+</head>
+<body>
+  <h1>💣 Mines Game</h1>
+  <p>Bet Amount: <input type="number" id="betAmount" value="10" /></p>
+  <p>Mines: <input type="number" id="mineCount" value="3" min="1" max="24"/></p>
+  <button onclick="startGame()">Start Game</button>
+  <div class="grid" id="gameGrid"></div>
+  <p id="statusText"></p>
+  <p>Payout: $<span id="payout">0.00</span></p>
+
+  <script>
+    let minePositions = [];
+    let clickedTiles = 0;
+    let payout = 0;
+    let gameOver = false;
+
+    function startGame() {
+      const grid = document.getElementById("gameGrid");
+      grid.innerHTML = "";
+      minePositions = [];
+      clickedTiles = 0;
+      payout = 0;
+      gameOver = false;
+      document.getElementById("statusText").textContent = "";
+      document.getElementById("payout").textContent = "0.00";
+
+      const mines = parseInt(document.getElementById("mineCount").value);
+      while (minePositions.length < mines) {
+        const r = Math.floor(Math.random() * 25);
+        if (!minePositions.includes(r)) minePositions.push(r);
+      }
+
+      for (let i = 0; i < 25; i++) {
+        const tile = document.createElement("div");
+        tile.classList.add("tile");
+        tile.addEventListener("click", () => revealTile(tile, i));
+        grid.appendChild(tile);
+      }
+    }
+
+    function revealTile(tile, index) {
+      if (gameOver || tile.classList.contains("safe")) return;
+
+      if (minePositions.includes(index)) {
+        tile.classList.add("mine");
+        document.getElementById("statusText").textContent = "💥 You hit a mine! Game over.";
+        gameOver = true;
+        payout = 0;
+      } else {
+        tile.classList.add("safe");
+        clickedTiles++;
+        payout += calculatePayout(clickedTiles);
+        document.getElementById("payout").textContent = payout.toFixed(2);
+        if (clickedTiles === 25 - minePositions.length) {
+          document.getElementById("statusText").textContent = "🎉 You cleared all safe tiles!";
+          gameOver = true;
+        }
+      }
+    }
+
+    function calculatePayout(clicks) {
+      const baseBet = parseFloat(document.getElementById("betAmount").value);
+      return baseBet * 0.2 * clicks; // simple payout logic
+    }
+  </script>
+</body>
+</html>
